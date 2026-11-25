@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark" />
+<title>What should I eat?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0d0b0a;
+    --surface: #151210;
+    --raise: #1d1916;
+    --line: #2c2621;
+    --ink: #f1e8da;
+    --muted: #9a8e80;
+    --accent: #e4a24c;
+    --accent-ink: #1a1108;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; font-family: Geist, system-ui, sans-serif; color: var(--ink); min-height: 100vh;
+    padding: 28px 18px 48px; -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(110% 55% at 90% -10%, rgba(228, 162, 76, .13), transparent 60%),
+      radial-gradient(80% 45% at 0% 110%, rgba(150, 52, 28, .14), transparent 60%),
+      var(--bg);
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+  header { display: flex; flex-direction: column; gap: 12px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+  .eyebrow { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  .eyebrow::before { content: ""; width: 24px; height: 1px; background: var(--accent); }
+  h1 { font-family: Fraunces, serif; font-weight: 400; font-size: clamp(40px, 9vw, 76px); line-height: .95; letter-spacing: -.02em; margin: 0; }
+  h1 em { color: var(--accent); font-style: italic; }
+
+  .layout { display: flex; flex-direction: column; gap: 28px; }
+  aside { display: flex; flex-direction: column; gap: 22px; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { padding: 0; margin-bottom: 10px; display: flex; gap: 8px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  legend span { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span {
+    display: inline-block; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted); cursor: pointer; transition: color .15s, border-color .15s, background-color .15s;
+  }
+  .chip span:hover { color: var(--ink); border-color: #4a3f35; }
+  .chip input:checked + span { color: var(--accent); border-color: var(--accent); background: rgba(228, 162, 76, .08); }
+  .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .history { border-top: 1px solid var(--line); padding-top: 18px; font-size: 14px; }
+  .history h2 { margin: 0 0 6px; font-size: 11px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .history ol { margin: 0; padding: 0; list-style: none; }
+  .history button {
+    font: inherit; width: 100%; display: flex; justify-content: space-between; gap: 8px; text-align: left;
+    background: none; border: 0; border-bottom: 1px dashed var(--line); padding: 9px 0; color: var(--ink); cursor: pointer;
+  }
+  .history button::after { content: "\2192"; color: var(--muted); transition: transform .15s, color .15s; }
+  .history button:hover { color: var(--accent); }
+  .history button:hover::after { color: var(--accent); transform: translateX(3px); }
+  .history button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+  .stage {
+    background: linear-gradient(180deg, var(--raise), var(--surface)); border: 1px solid var(--line); border-radius: 24px;
+    padding: clamp(20px, 4vw, 36px); display: flex; flex-direction: column; gap: 24px; container-type: inline-size;
+    box-shadow: 0 40px 90px -50px rgba(0, 0, 0, .9);
+  }
+  .result { display: flex; flex-direction: column; gap: 20px; min-height: 220px; }
+  .result.fresh { animation: rise .45s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tags { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .tags span { font-size: 11px; letter-spacing: .06em; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); }
+  .dish { font-family: Fraunces, serif; font-weight: 400; font-size: clamp(40px, 11cqi, 84px); line-height: .95; letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+  .desc { margin: 0; font-family: Fraunces, serif; font-style: italic; font-size: clamp(17px, 3.2cqi, 21px); line-height: 1.4; color: var(--muted); max-width: 38ch; }
+  .spinning .dish { color: var(--muted); }
+
+  .stats { display: flex; margin: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .stats div { flex: 1; padding: 14px 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .stats div + div { border-left: 1px solid var(--line); padding-left: 16px; }
+  .stats dt { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .stats dd { margin: 0; font-family: Fraunces, serif; font-size: 22px; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+  button.go {
+    font: inherit; font-weight: 600; font-size: 15px; padding: 15px 26px; border-radius: 999px; border: 0;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer;
+    box-shadow: 0 12px 34px -12px rgba(228, 162, 76, .65); transition: transform .1s, filter .15s;
+  }
+  button.go:hover { filter: brightness(1.08); }
+  button.go:active { transform: scale(.97); }
+  button.go:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  button.go:disabled { opacity: .6; cursor: wait; }
+  .hint { margin: 0; font-size: 13px; color: var(--muted); }
+  .hint strong { color: var(--ink); font-weight: 600; }
+
+  details.recipe { border-top: 1px solid var(--line); }
+  details.recipe summary {
+    list-style: none; cursor: pointer; padding: 18px 0 4px; display: flex; justify-content: space-between; align-items: center;
+    font-family: Fraunces, serif; font-style: italic; font-size: 22px;
+  }
+  details.recipe summary::-webkit-details-marker { display: none; }
+  details.recipe summary::after {
+    content: "+"; font-family: Geist, system-ui, sans-serif; font-style: normal; font-size: 18px; line-height: 1;
+    width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--line); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; transition: transform .2s, border-color .2s;
+  }
+  details.recipe[open] summary::after { transform: rotate(45deg); border-color: var(--accent); }
+  details.recipe summary:hover::after { border-color: var(--accent); }
+  details.recipe summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 6px; }
+  .recipe-body { padding-top: 16px; display: flex; flex-direction: column; gap: 28px; }
+  .recipe h3 { margin: 0 0 10px; font-size: 11px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  @container (min-width: 600px) {
+    .recipe-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 40px; }
+  }
+
+  .scale { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 14px; font-size: 13px; color: var(--muted); }
+  .scale div { display: flex; align-items: center; gap: 6px; }
+  .scale button {
+    font: inherit; width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--line);
+    background: transparent; color: var(--ink); cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .scale button:hover { border-color: var(--accent); color: var(--accent); }
+  .scale button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .scale output { min-width: 1.8em; text-align: center; font-family: Fraunces, serif; font-size: 18px; color: var(--ink); }
+
+  .ingredients { list-style: none; margin: 0; padding: 0; }
+  .ingredients label { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 14.5px; line-height: 1.45; cursor: pointer; }
+  .ingredients input { accent-color: var(--accent); margin-top: 3px; width: 16px; height: 16px; flex-shrink: 0; }
+  .ingredients strong { color: var(--accent); font-weight: 600; }
+  .ingredients input:checked + span { text-decoration: line-through; color: var(--muted); }
+  .ingredients input:checked + span strong { color: var(--muted); }
+
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 18px; }
+  .steps li { counter-increment: step; display: flex; gap: 16px; font-size: 15px; line-height: 1.6; }
+  .steps li::before {
+    content: counter(step, decimal-leading-zero); flex-shrink: 0; width: 2ch;
+    font-family: Fraunces, serif; font-style: italic; font-size: 20px; line-height: 1.2; color: var(--accent);
+  }
+
+  @media (min-width: 820px) {
+    .layout { flex-direction: row; align-items: flex-start; gap: 40px; }
+    aside { width: 250px; flex-shrink: 0; position: sticky; top: 24px; }
+    .stage { flex: 1; min-width: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .result.fresh { animation: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Decision fatigue, solved</p>
+    <h1>What should I <em>eat</em>?</h1>
+  </header>
+
+  <div class="layout">
+    <aside aria-label="Filters">
+      <fieldset>
+        <legend><span>01</span> Mood</legend>
+        <div class="chips" id="moods"></div>
+      </fieldset>
+      <fieldset>
+        <legend><span>02</span> Diet</legend>
+        <div class="chips" id="diets"></div>
+      </fieldset>
+      <fieldset>
+        <legend><span>03</span> Time I have</legend>
+        <div class="chips" id="times"></div>
+      </fieldset>
+      <section class="history" id="history" hidden>
+        <h2>Recently suggested</h2>
+        <ol id="historyList"></ol>
+      </section>
+    </aside>
+
+    <main class="stage">
+      <section class="result" id="result" aria-live="polite">
+        <div class="meta"><span>Tonight&apos;s pick</span></div>
+        <p class="dish">Let fate decide.</p>
+        <p class="desc">Set a mood, a diet and how long you&apos;ve got &mdash; or don&apos;t. Then hit the button.</p>
+      </section>
+      <div class="actions">
+        <button class="go" id="go" type="button">Pick something</button>
+        <p class="hint" id="hint" aria-live="polite"></p>
+      </div>
+      <div id="recipe"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+// ing entries: [amount per base serving (number or null), unit/text]
+const FOODS = [
+  { name: "Ramen", desc: "Rich broth, springy noodles, a soft egg.", moods: ["cozy"], tags: ["japanese"], diet: [], time: 35, level: "Medium", serves: 2,
+    ing: [[2,"portions fresh ramen noodles"],[4,"cups chicken stock"],[2,"tbsp soy sauce"],[1,"tbsp white miso"],[2,"eggs"],[2,"green onions, sliced"],[1,"tsp sesame oil"]],
+    steps: ["Boil eggs for 6½ minutes, then chill in ice water and peel.","Simmer stock with soy sauce and miso for 10 minutes.","Cook noodles per the packet and drain.","Divide noodles into bowls, ladle over broth, top with halved eggs, green onion and sesame oil."] },
+  { name: "Margherita Pizza", desc: "Tomato, mozzarella, basil. Classic for a reason.", moods: ["cozy", "quick"], tags: ["italian"], diet: ["vegetarian"], time: 25, level: "Easy", serves: 2,
+    ing: [[1,"ball pizza dough"],[0.5,"cup crushed tomatoes"],[125,"g fresh mozzarella"],[1,"handful basil leaves"],[1,"tbsp olive oil"],[null,"Salt to taste"]],
+    steps: ["Heat oven as hot as it goes (250°C / 480°F) with a tray inside.","Stretch dough thin on a floured sheet of baking paper.","Spread tomatoes, season with salt, tear over mozzarella.","Slide onto the hot tray and bake 8–10 minutes until blistered.","Finish with basil and a drizzle of olive oil."] },
+  { name: "Poke Bowl", desc: "Raw fish, rice, crunchy veg, sesame.", moods: ["fresh"], tags: ["hawaiian"], diet: ["gluten-free"], time: 30, level: "Easy", serves: 2,
+    ing: [[250,"g sushi-grade salmon or tuna, cubed"],[1,"cup sushi rice"],[2,"tbsp tamari"],[1,"tsp sesame oil"],[1,"avocado, sliced"],[1,"cucumber, diced"],[1,"tbsp sesame seeds"]],
+    steps: ["Rinse and cook the rice; let it cool slightly.","Toss fish with tamari and sesame oil; rest 10 minutes.","Prep avocado and cucumber.","Build bowls: rice, fish, veg, then a shower of sesame seeds."] },
+  { name: "Tacos al Pastor", desc: "Spit-roasted pork, pineapple, cilantro.", moods: ["spicy", "quick"], tags: ["mexican"], diet: ["gluten-free"], time: 30, level: "Medium", serves: 2,
+    ing: [[400,"g pork shoulder, thinly sliced"],[2,"tbsp achiote paste"],[1,"chipotle in adobo, chopped"],[1,"cup pineapple, diced"],[6,"corn tortillas"],[0.5,"onion, finely chopped"],[1,"handful cilantro"],[1,"lime"]],
+    steps: ["Rub pork with achiote, chipotle and a squeeze of lime.","Sear in a very hot pan in batches until charred at the edges.","Char the pineapple in the same pan.","Warm tortillas and pile with pork, pineapple, onion and cilantro."] },
+  { name: "Pad Thai", desc: "Sweet, sour, nutty stir-fried noodles.", moods: ["quick", "spicy"], tags: ["thai"], diet: [], time: 25, level: "Medium", serves: 2,
+    ing: [[150,"g rice noodles"],[200,"g shrimp or tofu"],[2,"tbsp tamarind paste"],[2,"tbsp fish sauce"],[1,"tbsp brown sugar"],[2,"eggs"],[1,"cup bean sprouts"],[3,"tbsp crushed peanuts"]],
+    steps: ["Soak noodles in hot water until just pliable; drain.","Mix tamarind, fish sauce and sugar into a sauce.","Stir-fry shrimp or tofu in a hot wok, push aside and scramble the eggs.","Add noodles and sauce; toss 2 minutes. Fold in sprouts.","Serve with peanuts, lime and chili flakes."] },
+  { name: "Greek Salad", desc: "Tomato, cucumber, olives, feta, oregano.", moods: ["fresh", "quick"], tags: ["greek"], diet: ["vegetarian", "gluten-free"], time: 10, level: "Easy", serves: 2,
+    ing: [[3,"ripe tomatoes, wedged"],[1,"cucumber, chunked"],[0.5,"red onion, sliced"],[0.5,"cup kalamata olives"],[150,"g feta block"],[3,"tbsp olive oil"],[1,"tsp dried oregano"]],
+    steps: ["Combine tomatoes, cucumber, onion and olives in a bowl.","Season with salt and toss with half the olive oil.","Lay the feta on top whole.","Finish with oregano and the remaining oil."] },
+  { name: "Chana Masala", desc: "Spiced chickpeas in a tangy tomato gravy.", moods: ["spicy", "cozy"], tags: ["indian"], diet: ["vegan", "vegetarian", "gluten-free"], time: 35, level: "Easy", serves: 3,
+    ing: [[2,"cans chickpeas, drained"],[1,"onion, diced"],[3,"garlic cloves, minced"],[1,"tbsp grated ginger"],[1,"can crushed tomatoes"],[2,"tsp garam masala"],[1,"tsp cumin seeds"],[1,"lemon"]],
+    steps: ["Toast cumin seeds in oil until fragrant.","Add onion and cook until golden, about 8 minutes.","Stir in garlic, ginger and garam masala for 1 minute.","Add tomatoes and chickpeas; simmer 15 minutes, mashing a few chickpeas.","Finish with lemon juice and serve with rice or naan."] },
+  { name: "Burger & Fries", desc: "Smash patty, cheese, pickles. No regrets.", moods: ["indulgent"], tags: ["american"], diet: [], time: 30, level: "Easy", serves: 2,
+    ing: [[300,"g ground beef (20% fat)"],[2,"brioche buns"],[2,"slices American cheese"],[1,"handful pickles"],[2,"tbsp burger sauce"],[400,"g frozen fries"]],
+    steps: ["Bake fries according to the packet.","Roll beef into balls and smash hard onto a smoking-hot pan.","Season, cook 2 minutes, flip, add cheese and cook 1 minute more.","Toast buns, sauce them, add pickles and the patty."] },
+  { name: "Falafel Wrap", desc: "Crispy falafel, tahini, pickled veg.", moods: ["quick", "fresh"], tags: ["middle eastern"], diet: ["vegan", "vegetarian"], time: 20, level: "Easy", serves: 2,
+    ing: [[8,"store-bought falafel"],[2,"large flatbreads"],[3,"tbsp tahini"],[1,"lemon"],[1,"cup shredded lettuce"],[1,"tomato, diced"],[0.5,"cup pickled turnips or onions"]],
+    steps: ["Crisp falafel in the oven or air fryer for 8–10 minutes.","Whisk tahini with lemon juice and water until drizzly.","Warm flatbreads, then layer lettuce, tomato, pickles and falafel.","Drizzle tahini, roll tight and wrap in foil."] },
+  { name: "Mac & Cheese", desc: "Baked, bubbling, golden on top.", moods: ["cozy", "indulgent"], tags: ["comfort"], diet: ["vegetarian"], time: 40, level: "Easy", serves: 4,
+    ing: [[300,"g macaroni"],[3,"tbsp butter"],[3,"tbsp flour"],[2.5,"cups milk"],[200,"g sharp cheddar, grated"],[1,"tsp mustard"],[0.5,"cup breadcrumbs"]],
+    steps: ["Cook macaroni 2 minutes short of the packet time; drain.","Melt butter, whisk in flour, then slowly add milk until thick.","Off the heat, stir in cheddar and mustard; season.","Fold in pasta, top with breadcrumbs and bake at 200°C / 400°F for 15 minutes."] },
+  { name: "Pho", desc: "Fragrant beef broth with herbs and lime.", moods: ["cozy", "fresh"], tags: ["vietnamese"], diet: ["gluten-free"], time: 45, level: "Medium", serves: 2,
+    ing: [[5,"cups beef stock"],[1,"onion, halved"],[1,"thumb ginger, halved"],[2,"star anise"],[1,"cinnamon stick"],[150,"g flat rice noodles"],[150,"g sirloin, sliced paper-thin"],[1,"bunch herbs (basil, cilantro, mint)"]],
+    steps: ["Char onion and ginger in a dry pan until blackened in spots.","Simmer stock with onion, ginger, star anise and cinnamon for 30 minutes; strain.","Season broth with fish sauce and a pinch of sugar.","Cook noodles and divide into bowls, top with raw beef.","Pour boiling broth over to cook the beef; serve with herbs and lime."] },
+  { name: "Sushi", desc: "Nigiri, maki, a little wasabi kick.", moods: ["fresh"], tags: ["japanese"], diet: [], time: 50, level: "Hard", serves: 2,
+    ing: [[1.5,"cups sushi rice"],[3,"tbsp rice vinegar"],[1,"tbsp sugar"],[4,"nori sheets"],[200,"g sushi-grade fish"],[1,"cucumber, cut in batons"],[null,"Soy sauce, wasabi and pickled ginger"]],
+    steps: ["Cook rice, then fold in vinegar and sugar; cool to room temperature.","Lay nori on a bamboo mat and spread a thin layer of rice, leaving a top border.","Line fish and cucumber along the bottom edge.","Roll tightly away from you, seal with a little water.","Slice with a wet sharp knife and serve with soy, wasabi and ginger."] },
+  { name: "Thai Green Curry", desc: "Coconut, chili, basil, jasmine rice.", moods: ["spicy", "cozy"], tags: ["thai"], diet: ["gluten-free"], time: 30, level: "Easy", serves: 3,
+    ing: [[3,"tbsp green curry paste"],[1,"can coconut milk"],[400,"g chicken thigh, sliced"],[1,"cup green beans or eggplant"],[1,"tbsp fish sauce"],[1,"tsp sugar"],[1,"handful Thai basil"],[1,"cup jasmine rice"]],
+    steps: ["Start the rice.","Fry curry paste in a splash of coconut cream until fragrant.","Add chicken and cook until sealed, then pour in the rest of the coconut milk.","Add vegetables, fish sauce and sugar; simmer 10 minutes.","Stir in basil and serve over rice."] },
+  { name: "Buddha Bowl", desc: "Grains, roasted veg, greens, tahini.", moods: ["fresh"], tags: ["healthy"], diet: ["vegan", "vegetarian", "gluten-free"], time: 35, level: "Easy", serves: 2,
+    ing: [[1,"cup quinoa"],[1,"sweet potato, cubed"],[1,"can chickpeas, drained"],[2,"cups kale or spinach"],[1,"avocado"],[3,"tbsp tahini"],[1,"lemon"]],
+    steps: ["Roast sweet potato and chickpeas at 220°C / 425°F for 25 minutes.","Cook quinoa meanwhile.","Massage greens with a little lemon and salt.","Whisk tahini, lemon and water into a dressing.","Assemble bowls and drizzle generously."] },
+  { name: "Fried Chicken", desc: "Crunchy, juicy, extra hot sauce.", moods: ["indulgent", "spicy"], tags: ["southern"], diet: [], time: 60, level: "Hard", serves: 3,
+    ing: [[6,"chicken thighs, bone-in"],[2,"cups buttermilk"],[2,"tbsp hot sauce"],[2,"cups flour"],[1,"tbsp paprika"],[1,"tsp cayenne"],[null,"Neutral oil for frying"]],
+    steps: ["Marinate chicken in buttermilk and hot sauce for at least 30 minutes.","Mix flour with paprika, cayenne, salt and pepper.","Dredge chicken, letting a few drips of buttermilk into the flour for extra craggy bits.","Fry at 165°C / 325°F for 12–14 minutes, turning, until 74°C / 165°F inside.","Rest on a rack and finish with more hot sauce."] },
+  { name: "Mushroom Risotto", desc: "Creamy arborio, parmesan, thyme.", moods: ["cozy"], tags: ["italian"], diet: ["vegetarian", "gluten-free"], time: 40, level: "Medium", serves: 2,
+    ing: [[1,"cup arborio rice"],[250,"g mushrooms, sliced"],[1,"shallot, minced"],[0.5,"cup white wine"],[4,"cups hot vegetable stock"],[0.5,"cup grated parmesan"],[2,"tbsp butter"],[1,"tsp fresh thyme"]],
+    steps: ["Sear mushrooms in butter until golden; set aside.","Soften shallot, add rice and toast 2 minutes.","Add wine and stir until absorbed.","Add stock a ladle at a time, stirring, for about 18 minutes.","Fold in mushrooms, parmesan, thyme and a final knob of butter."] },
+  { name: "Bibimbap", desc: "Rice, veg, egg, gochujang — mix it all.", moods: ["spicy", "fresh"], tags: ["korean"], diet: ["vegetarian"], time: 35, level: "Medium", serves: 2,
+    ing: [[1,"cup short-grain rice"],[1,"carrot, julienned"],[1,"zucchini, julienned"],[2,"cups spinach"],[1,"cup bean sprouts"],[2,"eggs"],[2,"tbsp gochujang"],[1,"tbsp sesame oil"]],
+    steps: ["Cook the rice.","Quickly sauté each vegetable separately with a pinch of salt and sesame oil.","Fry eggs sunny-side up.","Arrange vegetables over rice, top with egg and a dollop of gochujang.","Mix everything together at the table."] },
+  { name: "Grilled Cheese & Tomato Soup", desc: "The ultimate rainy-day combo.", moods: ["cozy", "quick"], tags: ["comfort"], diet: ["vegetarian"], time: 25, level: "Easy", serves: 2,
+    ing: [[1,"can whole tomatoes"],[1,"cup vegetable stock"],[1,"garlic clove"],[2,"tbsp cream"],[4,"slices sourdough"],[100,"g cheddar, grated"],[2,"tbsp butter"]],
+    steps: ["Simmer tomatoes, stock and garlic for 10 minutes.","Blend until smooth, stir in cream and season.","Butter the outside of the bread and fill with cheese.","Cook in a pan over medium-low heat until golden and melty, 3 minutes per side.","Cut diagonally (mandatory) and dunk."] },
+  { name: "Ice Cream for Dinner", desc: "You're an adult. Nobody can stop you.", moods: ["indulgent"], tags: ["dessert"], diet: ["vegetarian", "gluten-free"], time: 5, level: "Easy", serves: 1,
+    ing: [[2,"scoops of your favorite ice cream"],[2,"tbsp hot fudge"],[1,"tbsp crushed nuts"],[1,"handful berries"],[null,"Zero guilt"]],
+    steps: ["Let the ice cream soften for 3 minutes.","Scoop into your biggest bowl.","Pour over warm fudge and scatter nuts and berries.","Eat on the couch."] },
+  { name: "Lentil Soup", desc: "Hearty, warming, packed with protein.", moods: ["cozy"], tags: ["healthy"], diet: ["vegan", "vegetarian", "gluten-free"], time: 40, level: "Easy", serves: 4,
+    ing: [[1,"cup red or green lentils"],[1,"onion, diced"],[2,"carrots, diced"],[2,"celery stalks, diced"],[2,"garlic cloves"],[1,"tsp cumin"],[5,"cups vegetable stock"],[1,"lemon"]],
+    steps: ["Soften onion, carrot and celery in olive oil for 8 minutes.","Add garlic and cumin; cook 1 minute.","Add lentils and stock; simmer 25 minutes until tender.","Blend half for body, then finish with lemon juice and black pepper."] },
+];
+
+const MOODS = ["any", "cozy", "fresh", "spicy", "quick", "indulgent"];
+const DIETS = ["none", "vegetarian", "vegan", "gluten-free"];
+const TIMES = [["any", "Any"], ["20", "≤ 20 min"], ["30", "≤ 30 min"], ["45", "≤ 45 min"]];
+
+const cap = s => s[0].toUpperCase() + s.slice(1);
+function renderChips(id, name, values) {
+  document.getElementById(id).innerHTML = values.map((v, i) => {
+    const [value, label] = Array.isArray(v) ? v : [v, cap(v)];
+    return `<label class="chip"><input type="radio" name="${name}" value="${value}" ${i === 0 ? "checked" : ""}><span>${label}</span></label>`;
+  }).join("");
+}
+renderChips("moods", "mood", MOODS);
+renderChips("diets", "diet", DIETS);
+renderChips("times", "time", TIMES);
+
+const result = document.getElementById("result");
+const recipe = document.getElementById("recipe");
+const hint = document.getElementById("hint");
+const btn = document.getElementById("go");
+const history = [];
+let current = null;
+let servings = 2;
+
+function candidates() {
+  const val = n => document.querySelector(`input[name="${n}"]:checked`).value;
+  const mood = val("mood"), diet = val("diet"), time = val("time");
+  return FOODS.filter(f =>
+    (mood === "any" || f.moods.includes(mood)) &&
+    (diet === "none" || f.diet.includes(diet)) &&
+    (time === "any" || f.time <= Number(time))
+  );
+}
+
+function updateHint() {
+  const n = candidates().length;
+  hint.innerHTML = n
+    ? `<strong>${n}</strong> of ${FOODS.length} dishes match`
+    : `No dishes match &mdash; loosen a filter`;
+}
+document.querySelector("aside").addEventListener("change", updateHint);
+updateHint();
+
+function fmt(n) {
+  if (n >= 10) return String(Math.round(n));
+  const whole = Math.floor(n), frac = n - whole;
+  const fracs = [[0, ""], [0.25, "¼"], [0.33, "⅓"], [0.5, "½"], [0.67, "⅔"], [0.75, "¾"], [1, ""]];
+  const [f, sym] = fracs.reduce((a, b) => Math.abs(b[0] - frac) < Math.abs(a[0] - frac) ? b : a);
+  const w = f === 1 ? whole + 1 : whole;
+  return (w ? w : "") + sym || "0";
+}
+
+function ingredientList(food) {
+  const ratio = servings / food.serves;
+  return food.ing.map(([amt, text], i) => `
+    <li><label><input type="checkbox" id="ing-${i}"><span>${amt == null ? text : `<strong>${fmt(amt * ratio)}</strong> ${text}`}</span></label></li>
+  `).join("");
+}
+
+const pad = n => String(n).padStart(2, "0");
+
+function show(food, final) {
+  result.classList.toggle("spinning", !final);
+  result.classList.remove("fresh");
+  const no = `No. ${pad(FOODS.indexOf(food) + 1)} / ${FOODS.length}`;
+  if (!final) {
+    result.innerHTML = `<div class="meta"><span>${no}</span></div><p class="dish">${food.name}</p>`;
+    recipe.innerHTML = "";
+    return;
+  }
+  current = food;
+  servings = food.serves;
+  result.innerHTML = `
+    <div class="meta">
+      <span>${no}</span>
+      <div class="tags">${[...food.tags, ...food.diet].map(t => `<span>${t}</span>`).join("")}</div>
+    </div>
+    <p class="dish">${food.name}</p>
+    <p class="desc">${food.desc}</p>
+    <dl class="stats">
+      <div><dt>Time</dt><dd>${food.time} min</dd></div>
+      <div><dt>Level</dt><dd>${food.level}</dd></div>
+      <div><dt>Steps</dt><dd>${food.steps.length}</dd></div>
+    </dl>
+  `;
+  void result.offsetWidth;
+  result.classList.add("fresh");
+  recipe.innerHTML = `
+    <details class="recipe">
+      <summary>The recipe</summary>
+      <div class="recipe-body">
+        <div>
+          <h3>Ingredients</h3>
+          <div class="scale">
+            <span>Servings</span>
+            <div>
+              <button type="button" data-scale="-1" aria-label="Fewer servings">−</button>
+              <output id="servings" aria-live="polite">${servings}</output>
+              <button type="button" data-scale="1" aria-label="More servings">+</button>
+            </div>
+          </div>
+          <ul class="ingredients" id="ingredients">${ingredientList(food)}</ul>
+        </div>
+        <div>
+          <h3>Method</h3>
+          <ol class="steps">${food.steps.map(s => `<li><span>${s}</span></li>`).join("")}</ol>
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+recipe.addEventListener("click", e => {
+  const b = e.target.closest("[data-scale]");
+  if (!b || !current) return;
+  servings = Math.min(12, Math.max(1, servings + Number(b.dataset.scale)));
+  document.getElementById("servings").textContent = servings;
+  document.getElementById("ingredients").innerHTML = ingredientList(current);
+});
+
+function renderHistory() {
+  document.getElementById("history").hidden = false;
+  document.getElementById("historyList").innerHTML = history
+    .map(h => `<li><button type="button" data-food="${h}">${h}</button></li>`).join("");
+}
+
+document.getElementById("historyList").addEventListener("click", e => {
+  const b = e.target.closest("[data-food]");
+  if (!b) return;
+  const food = FOODS.find(f => f.name === b.dataset.food);
+  if (food) show(food, true);
+});
+
+btn.addEventListener("click", () => {
+  const pool = candidates();
+  if (!pool.length) {
+    result.classList.remove("spinning");
+    result.innerHTML = `<div class="meta"><span>No match</span></div><p class="dish">Hmm.</p><p class="desc">Nothing fits that combo. Try loosening a filter.</p>`;
+    recipe.innerHTML = "";
+    return;
+  }
+  const last = history[0];
+  const choices = pool.length > 1 ? pool.filter(f => f.name !== last) : pool;
+  const pick = choices[Math.floor(Math.random() * choices.length)];
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  btn.disabled = true;
+  let ticks = reduced ? 0 : 12;
+  (function spin(delay) {
+    if (ticks-- > 0) {
+      show(pool[Math.floor(Math.random() * pool.length)], false);
+      setTimeout(() => spin(delay * 1.18), delay);
+    } else {
+      show(pick, true);
+      btn.disabled = false;
+      btn.textContent = "Nah, pick again";
+      history.unshift(pick.name);
+      history.splice(5);
+      renderHistory();
+    }
+  })(40);
+});
+</script>
+</body>
+</html>
